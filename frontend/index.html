@@ -3,28 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1220">
-  <title>PhishGuard — Email Risk Scanner</title>
+  <meta name="theme-color" content="#060b17">
+  <title>MailGuard — Phishing Email &amp; Website Scanner</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
-      --bg: #080d18;
-      --surface: #111a2b;
-      --surface-2: #172238;
-      --border: #29364e;
-      --text: #edf3ff;
-      --muted: #9aa9c2;
-      --accent: #6ee7c2;
-      --accent-dark: #102f2c;
-      --danger: #ff6b83;
-      --warning: #ffc76b;
-      --good: #6ee7c2;
+      --bg: #060b17;
+      --surface: #0e172a;
+      --surface-2: #14223d;
+      --border: #1f304f;
+      --text: #edf4ff;
+      --muted: #8ea3c4;
+      --accent: #38bdf8;
+      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+      --accent-dark: #082845;
+      --danger: #ff4d6d;
+      --warning: #fbbf24;
+      --good: #38bdf8;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       background:
-        radial-gradient(ellipse at 10% 0%, rgba(56, 93, 151, .22), transparent 40%),
+        radial-gradient(ellipse at 15% 0%, rgba(14, 165, 233, .16), transparent 45%),
+        radial-gradient(ellipse at 85% 20%, rgba(2, 132, 199, .10), transparent 40%),
         var(--bg);
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
@@ -32,92 +38,204 @@
     }
     .shell { max-width: 1120px; margin: 0 auto; padding: 28px 20px 56px; }
     header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 44px; }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.03em; font-size: 1.2rem; }
-    .logo { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: var(--accent); color: #06251f; font-size: 1.25rem; }
-    .tag { color: var(--muted); font-size: .83rem; border: 1px solid var(--border); border-radius: 999px; padding: 7px 12px; }
-    .hero { max-width: 750px; margin: 0 auto 32px; text-align: center; }
-    .eyebrow { color: var(--accent); text-transform: uppercase; font-size: .76rem; letter-spacing: .16em; font-weight: 800; }
-    h1 { font-size: clamp(2.3rem, 6vw, 4.1rem); line-height: 1.05; letter-spacing: -.055em; margin: 14px 0 18px; }
+    .brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; }
+    .brand-logo-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 13px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.22);
+      display: block;
+      background: #000711;
+      object-fit: cover;
+    }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+    .brand-title { font-size: 1.4rem; font-weight: 850; letter-spacing: -.03em; }
+    .brand-title .mail { color: #ffffff; }
+    .brand-title .guard {
+      background: linear-gradient(135deg, #38bdf8 15%, #00d2ff 60%, #0284c7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tag { color: var(--muted); font-size: .83rem; border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; background: rgba(14, 23, 42, 0.6); }
+    .hero { max-width: 750px; margin: 0 auto 36px; text-align: center; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #38bdf8;
+      text-transform: uppercase;
+      font-size: .76rem;
+      letter-spacing: .16em;
+      font-weight: 800;
+      border: 1px solid rgba(56, 189, 248, .28);
+      background: rgba(56, 189, 248, .07);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ff4d6d;
+      box-shadow: 0 0 8px #ff4d6d;
+      display: inline-block;
+    }
+    h1 { font-size: clamp(2.3rem, 6vw, 4.1rem); line-height: 1.05; letter-spacing: -.055em; margin: 10px 0 18px; }
     .hero p { color: var(--muted); font-size: 1.05rem; max-width: 620px; margin: 0 auto; }
     .layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 20px; align-items: start; }
-    .panel { border: 1px solid var(--border); background: rgba(17, 26, 43, .94); border-radius: 22px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.12); }
+    .panel { border: 1px solid var(--border); background: rgba(14, 23, 42, .94); border-radius: 22px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.18); }
     .panel h2 { margin: 0 0 6px; font-size: 1.18rem; }
     .sub { color: var(--muted); font-size: .9rem; margin: 0 0 22px; }
     label { display: block; color: #d8e2f5; font-size: .88rem; font-weight: 700; margin: 16px 0 8px; }
     input, textarea {
-      width: 100%; color: var(--text); background: #0b1322; border: 1px solid var(--border);
+      width: 100%; color: var(--text); background: #080f1d; border: 1px solid var(--border);
       border-radius: 12px; padding: 12px 14px; font: inherit; outline: none; transition: border .15s, box-shadow .15s;
     }
-    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(110,231,194,.12); }
+    input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.16); }
     textarea { min-height: 150px; resize: vertical; }
     #urls { min-height: 82px; }
     .hint { color: var(--muted); font-size: .78rem; margin-top: 6px; }
     .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .mode-toggle { display: flex; gap: 8px; margin: 0 0 18px; }
+    .mode-toggle button { flex: 1; }
+    .mode-toggle button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
     button { cursor: pointer; border: 0; border-radius: 12px; padding: 12px 17px; font: inherit; font-weight: 800; }
-    .primary { background: var(--accent); color: #06251f; flex: 1; }
-    .secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .primary {
+      background: var(--accent-gradient);
+      color: #031324;
+      font-weight: 850;
+      letter-spacing: -.01em;
+      box-shadow: 0 4px 18px rgba(2, 132, 199, .35);
+      flex: 1;
+      transition: filter .15s, box-shadow .15s, transform .12s;
+    }
+    .primary:hover:not(:disabled) {
+      filter: brightness(1.12);
+      box-shadow: 0 6px 24px rgba(56, 189, 248, .45);
+      transform: translateY(-1px);
+    }
+    .primary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    .secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); transition: background .15s, border-color .15s; }
+    .secondary:hover { background: #1a2c4e; border-color: rgba(56, 189, 248, 0.4); }
     button:disabled { opacity: .65; cursor: wait; }
     .result-empty { min-height: 250px; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 25px; }
-    .shield { font-size: 2.5rem; margin-bottom: 10px; }
+    .empty-icon-wrap {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.18);
+      background: #000711;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .empty-icon-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
     .result-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .risk { border-radius: 999px; padding: 6px 11px; font-size: .78rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
-    .risk.low { color: var(--good); background: rgba(110,231,194,.12); }
-    .risk.medium { color: var(--warning); background: rgba(255,199,107,.12); }
-    .risk.high { color: var(--danger); background: rgba(255,107,131,.12); }
+    .risk.low { color: #38bdf8; background: rgba(56,189,248,.12); }
+    .risk.medium { color: var(--warning); background: rgba(251,191,36,.12); }
+    .risk.high { color: var(--danger); background: rgba(255,77,109,.12); }
+    .risk-alert-symbol { color: var(--danger); font-size: 1.35rem; line-height: 1; animation: risk-alert-blink .8s steps(2, start) infinite; }
+    @keyframes risk-alert-blink { to { visibility: hidden; } }
+    @media (prefers-reduced-motion: reduce) {
+      .risk-alert-symbol { animation: none; }
+    }
     .score { font-size: 2.8rem; font-weight: 850; letter-spacing: -.06em; margin: 18px 0 0; }
     .score-caption { color: var(--muted); font-size: .8rem; }
+    .risk-scale { margin-top: 14px; }
+    .risk-scale-track { height: 10px; position: relative; border-radius: 999px; background: linear-gradient(to right, var(--accent) 0 40%, var(--warning) 40% 70%, var(--danger) 70% 100%); }
+    .risk-scale-marker { position: absolute; top: 50%; width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; background: #091222; transform: translate(-50%, -50%); box-shadow: 0 0 8px rgba(0, 0, 0, .7); }
+    .risk-scale-bands { display: grid; grid-template-columns: 4fr 3fr 3fr; gap: 4px; margin-top: 9px; text-align: center; font-size: .72rem; font-weight: 800; }
+    .risk-scale-bands span { border-radius: 8px; padding: 6px 2px; }
+    .risk-scale-low { color: #38bdf8; background: rgba(56, 189, 248, .1); }
+    .risk-scale-medium { color: var(--warning); background: rgba(251, 191, 36, .1); }
+    .risk-scale-high { color: var(--danger); background: rgba(255, 77, 109, .1); }
+    .type-result { margin: 18px 0 0; padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: #091222; }
+    .type-result strong { display: block; font-size: .8rem; color: var(--muted); margin-bottom: 4px; }
+    .type-result span { font-size: .95rem; font-weight: 800; }
     .summary { color: #d4def0; margin: 18px 0; }
     .findings { display: grid; gap: 10px; margin-top: 18px; }
-    .finding { padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: #0d1626; }
+    .finding { padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: #091222; }
     .finding strong { display: block; font-size: .9rem; margin-bottom: 4px; }
     .finding p { color: var(--muted); font-size: .82rem; margin: 0; }
     .finding small { display: inline-block; color: var(--warning); margin-top: 6px; }
-    .notice { margin-top: 20px; border: 1px solid rgba(255,199,107,.25); background: rgba(255,199,107,.06); border-radius: 14px; padding: 13px 15px; color: #e8d7b4; font-size: .8rem; }
-    .how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
-    .mini { border: 1px solid var(--border); border-radius: 16px; padding: 17px; background: rgba(17,26,43,.65); }
-    .mini b { display: block; margin-bottom: 5px; font-size: .9rem; }
-    .mini span { color: var(--muted); font-size: .8rem; }
-    footer { text-align: center; color: var(--muted); font-size: .78rem; padding-top: 28px; }
+    .notice { margin-top: 20px; border: 1px solid rgba(251,191,36,.25); background: rgba(251,191,36,.06); border-radius: 14px; padding: 13px 15px; color: #fde68a; font-size: .8rem; }
+    footer { margin-top: 30px; padding: 22px; border: 1px solid var(--border); border-radius: 18px; background: rgba(14, 23, 42, .72); color: var(--muted); font-size: .82rem; }
+    .footer-title { margin: 0 0 12px; color: var(--text); text-align: center; font-size: 1rem; }
+    .safety-tips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+    .safety-tips li { padding: 12px; border-radius: 12px; background: #091222; }
+    .safety-tips strong { display: block; color: #d8e2f5; margin-bottom: 4px; }
+    .footer-note { margin: 16px 0 0; text-align: center; }
+    .designer-name { color: var(--accent); font-weight: 800; }
     .error { color: var(--danger); margin-top: 12px; font-size: .85rem; }
     @media (max-width: 800px) {
       .layout { grid-template-columns: 1fr; }
       header { margin-bottom: 34px; }
-      .how { grid-template-columns: 1fr; }
       .panel { padding: 19px; }
       .tag { display: none; }
+      .safety-tips { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <main class="shell">
     <header>
-      <div class="brand"><div class="logo" aria-hidden="true">⌁</div><span>PhishGuard</span></div>
+      <div class="brand">
+        <img src="assets/mailguard-icon.png" alt="MailGuard Logo" class="brand-logo-img">
+        <div class="brand-text">
+          <span class="brand-title"><span class="mail">Mail</span><span class="guard">Guard</span></span>
+        </div>
+      </div>
       <div class="tag">Cybersecurity learning project</div>
     </header>
 
     <section class="hero">
-      <div class="eyebrow">Email threat analysis</div>
-      <h1>Spot the hook.<br>Protect your inbox.</h1>
-      <p>Check an email for common phishing warning signs with a simple, transparent risk analysis.</p>
+      <div class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>Detect • Block • Stay Safe</div>
+      <h1>Spot phishing in emails<br>and website links.</h1>
+      <p>Check emails for phishing signals and website links for suspicious URL patterns. These checks can help flag common clues, but cannot guarantee detection of every threat.</p>
     </section>
 
-    <section class="layout" aria-label="Email analysis tool">
+    <section class="layout" aria-label="Phishing analysis tool">
       <form class="panel" id="scan-form">
-        <h2>Analyze an email</h2>
-        <p class="sub">Use a sample or paste non-sensitive email content.</p>
+        <div class="mode-toggle" role="group" aria-label="Choose what to analyze">
+          <button class="secondary" id="email-mode" type="button" aria-pressed="true">Email</button>
+          <button class="secondary" id="website-mode" type="button" aria-pressed="false">Website URL</button>
+        </div>
+        <h2 id="form-title">Analyze an email</h2>
+        <p class="sub" id="form-subtitle">Your email text is sent to Anthropic for analysis. Do not submit confidential or personal information.</p>
 
-        <label for="sender">Sender email</label>
-        <input id="sender" type="email" maxlength="320" placeholder="security@example.com" autocomplete="off">
+        <div id="email-fields">
+          <label for="sender">Sender email</label>
+          <input id="sender" type="email" maxlength="320" placeholder="security@example.com" autocomplete="off">
 
-        <label for="subject">Subject line</label>
-        <input id="subject" maxlength="500" placeholder="e.g. Urgent: verify your account">
+          <label for="subject">Subject line</label>
+          <input id="subject" maxlength="500" placeholder="e.g. Urgent: verify your account">
 
-        <label for="body">Email message</label>
-        <textarea id="body" maxlength="20000" placeholder="Paste the email text here..." required></textarea>
+          <label for="body">Email message</label>
+          <textarea id="body" maxlength="20000" placeholder="Paste the email text here..." required></textarea>
 
-        <label for="urls">Links in the email (optional)</label>
-        <textarea id="urls" placeholder="https://example.com/verify&#10;One URL per line"></textarea>
-        <div class="hint">The detector checks URL text only. It does not open or visit links.</div>
+          <label for="urls">Links in the email (optional)</label>
+          <textarea id="urls" placeholder="https://example.com/verify&#10;One URL per line"></textarea>
+          <div class="hint">Links are analyzed as text only and are never opened.</div>
+        </div>
+
+        <div id="website-fields" hidden>
+          <label for="website-url">Website URL</label>
+          <input id="website-url" type="url" maxlength="2048" placeholder="https://example.com/login" autocomplete="url">
+          <div class="hint">Only the URL is analyzed. MailGuard never opens or visits the website.</div>
+          <button class="secondary" id="website-sample-btn" type="button">Load website sample</button>
+        </div>
 
         <div class="actions">
           <button class="primary" id="scan-btn" type="submit">Analyze email <span aria-hidden="true">↗</span></button>
@@ -130,50 +248,100 @@
       <aside class="panel" aria-live="polite">
         <div id="empty-state" class="result-empty">
           <div>
-            <div class="shield" aria-hidden="true">⌑</div>
+            <div class="empty-icon-wrap">
+              <img src="assets/mailguard-icon.png" alt="MailGuard Shield" aria-hidden="true">
+            </div>
             <h2>Ready to scan</h2>
-            <p>Submit an email to see its risk level and the signals behind the result.</p>
+            <p>Submit an email or website URL to see its risk assessment and analysis.</p>
           </div>
         </div>
         <div id="result" hidden>
           <div class="result-top">
             <h2>Analysis result</h2>
-            <span id="risk" class="risk">Pending</span>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span id="risk-alert-symbol" class="risk-alert-symbol" aria-label="Risk detected" role="img" hidden>⚠</span>
+              <span id="risk" class="risk">Pending</span>
+            </div>
           </div>
-          <div class="score" id="score">0</div>
-          <div class="score-caption">Heuristic risk points — not a probability</div>
+          <div class="score"><span id="score">0</span><span aria-hidden="true"> / 10</span></div>
+          <div class="score-caption" id="score-caption">Risk score, not a probability</div>
+          <div class="risk-scale" id="risk-scale" role="img" aria-label="Risk scale: Low 0 to 3, Medium 4 to 6, High 7 to 10">
+            <div class="risk-scale-track"><span class="risk-scale-marker" id="risk-scale-marker"></span></div>
+            <div class="risk-scale-bands">
+              <span class="risk-scale-low">Low · 0–3</span>
+              <span class="risk-scale-medium">Medium · 4–6</span>
+              <span class="risk-scale-high">High · 7–10</span>
+            </div>
+          </div>
+          <div class="type-result">
+            <strong>Likely phishing type</strong>
+            <span id="phishing-type"></span>
+          </div>
           <p class="summary" id="summary"></p>
-          <h3 style="font-size:.92rem;margin:22px 0 0">Signals detected</h3>
+          <h3 style="font-size:.92rem;margin:22px 0 0">Assessment details</h3>
           <div id="findings" class="findings"></div>
           <div class="notice" id="disclaimer"></div>
         </div>
       </aside>
     </section>
 
-    <section class="how" aria-label="How it works">
-      <div class="mini"><b>01 · Inspect</b><span>Looks for urgency, threats, credential requests, and money requests.</span></div>
-      <div class="mini"><b>02 · Check links</b><span>Flags some suspicious URL patterns without opening the links.</span></div>
-      <div class="mini"><b>03 · Explain</b><span>Shows which rules contributed to the risk score.</span></div>
-    </section>
-
-    <footer>PhishGuard is an educational demo, not a replacement for your organization's security tools.</footer>
+    <footer aria-label="Phishing safety tips">
+      <h2 class="footer-title">Quick checks before you click</h2>
+      <ul class="safety-tips">
+        <li><strong>Check the sender</strong>Compare the full email address, not just the display name. Be cautious of misspellings and unexpected requests.</li>
+        <li><strong>Inspect links safely</strong>Hover to preview a link on desktop, or press and hold to preview on mobile. Check the actual domain and do not open links you do not trust.</li>
+        <li><strong>Pause on urgency</strong>Unexpected password, payment, gift-card, or verification requests should be confirmed through a known official channel—not by replying to the message.</li>
+      </ul>
+      <p class="footer-note">Designed by <span class="designer-name">Hitesh</span>, <span class="designer-name">Ashish</span>, <span class="designer-name">Anupam</span> and <span class="designer-name">Anurag</span>.</p>
+    </footer>
   </main>
 
   <script src="api-config.js"></script>
   <script>
-    const configuredApiBaseUrl = window.PHISHGUARD_API_BASE_URL || "";
-    const isLocalStaticPreview =
-      window.location.protocol === "file:" ||
-      (["localhost", "127.0.0.1"].includes(window.location.hostname) &&
-        window.location.port !== "8888");
-    const API_URL = isLocalStaticPreview
-      ? "http://127.0.0.1:8000/analyze"
-      : configuredApiBaseUrl
-        ? `${configuredApiBaseUrl.replace(/\/+$/, "")}/analyze`
-        : "/.netlify/functions/analyze";
+    const configuredApiBaseUrl =
+      window.MAILGUARD_API_BASE_URL || "";
+    const API_URLS = configuredApiBaseUrl
+      ? {
+          email: `${configuredApiBaseUrl.replace(/\/+$/, "")}/analyze`,
+          website: `${configuredApiBaseUrl.replace(/\/+$/, "")}/analyze-website`
+        }
+      : null;
     const form = document.getElementById("scan-form");
     const scanBtn = document.getElementById("scan-btn");
     const errorBox = document.getElementById("form-error");
+    const emailFields = document.getElementById("email-fields");
+    const websiteFields = document.getElementById("website-fields");
+    let alertAudioContext;
+    let riskAlertTriggered = false;
+    let scanMode = "email";
+
+    document.getElementById("email-mode").addEventListener("click", () => setScanMode("email"));
+    document.getElementById("website-mode").addEventListener("click", () => setScanMode("website"));
+
+    function setScanMode(mode) {
+      scanMode = mode;
+      const isEmail = mode === "email";
+      emailFields.hidden = !isEmail;
+      websiteFields.hidden = isEmail;
+      document.getElementById("body").required = isEmail;
+      document.getElementById("website-url").required = !isEmail;
+      document.getElementById("email-mode").setAttribute("aria-pressed", String(isEmail));
+      document.getElementById("website-mode").setAttribute("aria-pressed", String(!isEmail));
+      document.getElementById("form-title").textContent = isEmail ? "Analyze an email" : "Analyze a website URL";
+      document.getElementById("form-subtitle").textContent = isEmail
+        ? "The backend uses AI analysis when configured; otherwise it applies local checks. Avoid sensitive information."
+        : "The URL is checked for common phishing clues only. It is not sent to Anthropic, and the website is never opened or visited.";
+      document.getElementById("sample-btn").hidden = !isEmail;
+      document.getElementById("website-sample-btn").hidden = isEmail;
+      scanBtn.innerHTML = `Analyze ${isEmail ? "email" : "website URL"} <span aria-hidden="true">↗</span>`;
+      errorBox.hidden = true;
+    }
+
+    document.getElementById("website-sample-btn").addEventListener("click", () => {
+      document.getElementById("website-url").value =
+        "https://account-security.example.test/verify-login";
+      errorBox.hidden = true;
+    });
 
     document.getElementById("sample-btn").addEventListener("click", () => {
       document.getElementById("sender").value = "security-alert4921@example.test";
@@ -191,56 +359,139 @@
       errorBox.hidden = true;
     });
 
+    function prepareAlertAudio() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      alertAudioContext ||= new AudioContextClass();
+      if (alertAudioContext.state === "suspended") {
+        alertAudioContext.resume().catch((error) => {
+          console.warn("Could not enable the risk alert sound:", error);
+        });
+      }
+    }
+
+    function playDangerAlert() {
+      if (!alertAudioContext || alertAudioContext.state === "closed") return;
+      alertAudioContext.resume().then(() => {
+        const start = alertAudioContext.currentTime + 0.05;
+        const oscillator = alertAudioContext.createOscillator();
+        const volume = alertAudioContext.createGain();
+        oscillator.type = "sawtooth";
+        oscillator.frequency.setValueAtTime(680, start);
+        oscillator.frequency.linearRampToValueAtTime(1180, start + 0.32);
+        oscillator.frequency.linearRampToValueAtTime(680, start + 0.68);
+        volume.gain.setValueAtTime(0.0001, start);
+        volume.gain.exponentialRampToValueAtTime(0.12, start + 0.04);
+        volume.gain.setValueAtTime(0.12, start + 0.62);
+        volume.gain.exponentialRampToValueAtTime(0.0001, start + 0.72);
+        oscillator.connect(volume);
+        volume.connect(alertAudioContext.destination);
+        oscillator.start(start);
+        oscillator.stop(start + 0.74);
+      }).catch((error) => {
+        console.warn("Could not play the risk alert sound:", error);
+      });
+    }
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       errorBox.hidden = true;
-      const body = document.getElementById("body").value.trim();
-      if (!body) {
+      const isEmail = scanMode === "email";
+      if (isEmail) prepareAlertAudio();
+      const payload = isEmail
+        ? {
+            sender: document.getElementById("sender").value.trim(),
+            subject: document.getElementById("subject").value.trim(),
+            body: document.getElementById("body").value.trim(),
+            urls: document.getElementById("urls").value
+              .split(/\r?\n/).map((url) => url.trim()).filter(Boolean)
+          }
+        : { url: document.getElementById("website-url").value.trim() };
+      if (isEmail && !payload.body) {
         showError("Please paste the email message before analyzing.");
         return;
       }
 
-      const payload = {
-        sender: document.getElementById("sender").value.trim(),
-        subject: document.getElementById("subject").value.trim(),
-        body,
-        urls: document.getElementById("urls").value
-          .split(/\r?\n/).map((url) => url.trim()).filter(Boolean)
-      };
+      if (!API_URLS) {
+        showError("The scan API is not configured. Add MAILGUARD_API_BASE_URL to the Netlify site environment and redeploy.");
+        return;
+      }
 
       scanBtn.disabled = true;
       scanBtn.textContent = "Analyzing…";
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 35000);
       try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(isEmail ? API_URLS.email : API_URLS.website, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
         if (!response.ok) {
-          const detail = await response.text();
-          throw new Error(`Backend returned ${response.status}. ${detail.slice(0, 180)}`);
+          let errorMessage = `API returned HTTP ${response.status}.`;
+          try {
+            const errorBody = await response.json();
+            if (typeof errorBody.detail === "string") {
+              errorMessage = errorBody.detail;
+            }
+          } catch {
+            errorMessage += " The response was not readable.";
+          }
+          throw new Error(errorMessage);
         }
-        renderResult(await response.json());
+        const result = await response.json();
+        if (
+          !["Low", "Medium", "High"].includes(result.risk_level) ||
+          !Number.isInteger(result.score) ||
+          result.score < 0 ||
+          result.score > 10 ||
+          typeof result.phishing_type !== "string" ||
+          !Array.isArray(result.findings)
+        ) {
+          throw new Error("The scan API returned an invalid result. Please try again later.");
+        }
+        renderResult(result, isEmail);
       } catch (error) {
         showError(
-          "Could not analyze the email. Check your connection and try again. Details: " +
-            error.message
+          error.name === "AbortError"
+            ? "The scan took too long. Please try again."
+            : `Could not analyze the ${isEmail ? "email" : "website URL"}. ${error.message}`
         );
       } finally {
+        window.clearTimeout(timeoutId);
         scanBtn.disabled = false;
-        scanBtn.innerHTML = 'Analyze email <span aria-hidden="true">↗</span>';
+        scanBtn.innerHTML = `Analyze ${scanMode === "email" ? "email" : "website URL"} <span aria-hidden="true">↗</span>`;
       }
     });
 
-    function renderResult(data) {
+    function renderResult(data, isEmail) {
       document.getElementById("empty-state").hidden = true;
       document.getElementById("result").hidden = false;
       const risk = document.getElementById("risk");
       risk.textContent = data.risk_level + " risk";
       risk.className = "risk " + data.risk_level.toLowerCase();
+      if (data.risk_level === "High") {
+        riskAlertTriggered = true;
+      }
+      document.getElementById("risk-alert-symbol").hidden = !riskAlertTriggered;
       document.getElementById("score").textContent = data.score;
+      document.getElementById("risk-scale-marker").style.left =
+        `${Math.max(0, Math.min(Number(data.score), 10)) * 10}%`;
+      document.getElementById("risk-scale").setAttribute(
+        "aria-label",
+        `Risk score ${data.score} out of 10. ${data.risk_level} risk. Low is 0 to 3, Medium is 4 to 6, High is 7 to 10.`
+      );
+      document.getElementById("score-caption").textContent = isEmail
+        ? "AI-assisted email risk score — not a probability"
+        : "Heuristic URL risk score — not a probability";
+      document.getElementById("phishing-type").textContent =
+        data.phishing_type || "Unclear - needs review";
       document.getElementById("summary").textContent = data.summary;
       document.getElementById("disclaimer").textContent = data.disclaimer;
+      if (isEmail && ["Medium", "High"].includes(data.risk_level)) {
+        playDangerAlert();
+      }
 
       const list = document.getElementById("findings");
       list.replaceChildren();
@@ -252,11 +503,6 @@
         const detail = document.createElement("p");
         detail.textContent = item.detail;
         card.append(title, detail);
-        if (item.points > 0) {
-          const points = document.createElement("small");
-          points.textContent = `+${item.points} risk points`;
-          card.append(points);
-        }
         list.append(card);
       });
     }
