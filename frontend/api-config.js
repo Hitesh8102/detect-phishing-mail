@@ -1,1 +1,1 @@
-window.MAILGUARD_API_BASE_URL = "https://detect-phishing-mail.vercel.app/";
+window.MAILGUARD_API_BASE_URL = "/api";

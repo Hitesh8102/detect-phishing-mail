@@ -1,13 +1,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const configuredUrl = (process.env.MAILGUARD_API_BASE_URL || "").trim();
-
-if (!configuredUrl) {
-  throw new Error(
-    "Set MAILGUARD_API_BASE_URL to the HTTPS origin of your Vercel API."
-  );
-}
+const defaultApiUrl = "https://detect-phishing-mail.vercel.app";
+const configuredUrl = (process.env.MAILGUARD_API_BASE_URL || defaultApiUrl).trim();
 
 let parsedUrl;
 try {
@@ -31,9 +26,13 @@ if (
 }
 
 const apiBaseUrl = parsedUrl.origin;
-const configPath = path.join(__dirname, "..", "frontend", "api-config.js");
+const frontendDir = path.join(__dirname, "..", "frontend");
 fs.writeFileSync(
-  configPath,
-  `window.MAILGUARD_API_BASE_URL = ${JSON.stringify(apiBaseUrl)};\n`
+  path.join(frontendDir, "api-config.js"),
+  'window.MAILGUARD_API_BASE_URL = "/api";\n'
 );
-console.log(`Configured frontend API: ${apiBaseUrl}`);
+fs.writeFileSync(
+  path.join(frontendDir, "_redirects"),
+  `/api/* ${apiBaseUrl}/:splat 200\n`
+);
+console.log(`Configured same-origin API proxy to: ${apiBaseUrl}`);
